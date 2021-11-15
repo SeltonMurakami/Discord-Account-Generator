@@ -1,0 +1,6 @@
+config/proxies.txt
+chromedriver
+src/__pycache__/__init__.cpython-38.pyc
+src/__pycache__/api.cpython-38.pyc
+src/__pycache__/ui.cpython-38.pyc
+config/proxies.txt

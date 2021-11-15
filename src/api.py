@@ -1,6 +1,6 @@
 import requests
 import re
-from colorama import Fore, Style, init 
+from colorama import init 
 
 init(convert=True)
 

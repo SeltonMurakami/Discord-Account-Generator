@@ -2,18 +2,13 @@ import undetected_chromedriver as uc
 uc.install()
 
 import os
-import time 
-import requests
+import time
 import random
 import string
 import sys
 import threading
-import datetime
 import re
-from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
@@ -26,21 +21,14 @@ from sys import stdout
 from src import UI
 from src import GmailnatorRead, GmailnatorGet, dfilter_email, pfilter_email, find_email_type
 
+from selenium.webdriver.common.proxy import Proxy, ProxyType
+from selenium.webdriver import DesiredCapabilities
 init(convert=True)
 
 lock = threading.Lock()
 
 def password_gen(length=8, chars= string.ascii_letters + string.digits + string.punctuation):
         return ''.join(random.choice(chars) for _ in range(length))  
-
-# def minute_timer():
-#     while True:
-#         elapsed = time.strftime('%H:%M:%S', time.gmtime(time.time() - start))
-#         os.system(f'title Discord Generator ^| Rate Limit Timer ^| Time Elapsed {elapsed}')
-#         time.sleep(0.05)
-#         if elapsed == '00:01:00':
-#             print(f"{Fore.LIGHTMAGENTA_EX}[!]{Style.RESET_ALL} Timer finished.")
-#             break
 
 def gather_proxy():
         proxies = []
@@ -62,9 +50,22 @@ class DiscordGen:
         options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         if proxy:
+            prox = Proxy()
+            prox.proxyType = ProxyType.MANUAL
+            prox.autodetect = False
+            prox.httpProxy = prox.sslProxy = prox.socksProxy = proxy
+            options.Proxy = prox
+
+            capabilities = dict(DesiredCapabilities.CHROME)
+            capabilities['proxy'] = {'proxyType':
+                'MANUAL','httpProxy': proxy,
+                'ftpProxy': proxy,
+                'sslProxy': proxy,'noProxy': '',
+                'class': "org.openqa.selenium.Proxy",
+                'autodetect': False}
             options.add_argument('--proxy-server=%s' % proxy)
 
-        self.driver = webdriver.Chrome(options=options, executable_path=r"chromedriver.exe")
+        self.driver = webdriver.Chrome(options=options,desired_capabilities=capabilities)
 
         self.email= email
         self.username = username
@@ -78,13 +79,13 @@ class DiscordGen:
         WebDriverWait(self.driver, 1).until(EC.presence_of_element_located((By.XPATH, "//input[@type='email']")))
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.email)                          
-        self.driver.find_element_by_xpath("//input[@type='email']").send_keys(self.email)
+        self.driver.find_element(By.XPATH, "//input[@type='email']").send_keys(self.email)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.username)
-        self.driver.find_element_by_xpath("//input[@type='text']").send_keys(self.username)
+        self.driver.find_element(By.XPATH, "//input[@type='text']").send_keys(self.username)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.password)
-        self.driver.find_element_by_xpath("//input[@type='password']").send_keys(self.password)
+        self.driver.find_element(By.XPATH, "//input[@type='password']").send_keys(self.password)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL}" +' Random Date')
 
@@ -97,7 +98,7 @@ class DiscordGen:
             time.sleep(.5)
             
             # Locating to the first date input then the discord will navigate the focuse to the next input
-            self.driver.find_elements_by_class_name('css-1hwfws3')[0].click() 
+            self.driver.find_elements(By.CLASS_NAME, 'css-1hwfws3')[0].click() 
             
             actions.send_keys(str(random.randint(1,12))) # Submitting the month
 
@@ -145,13 +146,13 @@ class DiscordGen:
 
             #Submit form
             try: 
-                self.driver.find_element_by_class_name('inputDefault-3JxKJ2').click() # Agree to terms and conditions
+                self.driver.find_element(By.CLASS_NAME, 'inputDefault-3JxKJ2').click() # Agree to terms and conditions
             except:
                 free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} Could not find button. Ignoring..")
                 pass
 
             #input(f'{Fore.LIGHTMAGENTA_EX}[!]{Style.RESET_ALL} Press ENTER to create account.')
-            self.driver.find_element_by_class_name('button-3k0cO7').click() # Submit button        
+            self.driver.find_element(By.CLASS_NAME, 'button-3k0cO7').click() # Submit button        
             free_print(f'{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} Submit form')
 
         while True:
@@ -169,6 +170,7 @@ class DiscordGen:
 
     def verify_account(self,link):
         self.driver.get(link)
+        input('Please check if a CAPCTHA is requested again...')
         free_print(f"{Fore.LIGHTMAGENTA_EX}[!]{Style.RESET_ALL} Task complete")
 
     def close_driver(self):
@@ -264,7 +266,7 @@ def worker(proxy=None):
         token = str(d.token)
         lock.acquire()
         with open('output/login.txt', 'a', encoding='UTF-8') as login_file:
-            login_file.write(new_email + ':' + password + ':' + token + '\n')      
+            login_file.write(new_email + ' ' + password + ' ' + proxy + '\n')      
         lock.release()
         try:
             verify_link = start_verify(new_email, email_type)
@@ -292,7 +294,7 @@ def worker(proxy=None):
 def menu():
     proxies = gather_proxy()
 
-    os.system('cls')
+    os.system('clear')
 
     if len(proxies) != 0:
         os.system('title Discord Generator ^| coded by NightfallGT ^| PROXY LIST DETECTED')
@@ -309,7 +311,7 @@ def menu():
         user_input = 0
 
     if user_input == 1:
-        os.system('cls')
+        os.system('clear')
         UI.banner()
         UI.menu2()
 
@@ -347,7 +349,7 @@ def main():
         
         proxies = gather_proxy()
 
-        os.system('cls')
+        os.system('clear')
         UI.banner()
         print('\n\n')
 
