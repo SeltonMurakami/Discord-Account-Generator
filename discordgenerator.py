@@ -20,23 +20,24 @@ from bs4 import BeautifulSoup as soup
 from sys import stdout
 from src import UI
 from src import GmailnatorRead, GmailnatorGet, dfilter_email, pfilter_email, find_email_type
-
+from human_type import human_type
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver import DesiredCapabilities
+from selenium.webdriver.chrome.options import Options
 init(convert=True)
 
 lock = threading.Lock()
 
 def password_gen(length=8, chars= string.ascii_letters + string.digits + string.punctuation):
-        return ''.join(random.choice(chars) for _ in range(length))  
+    return ''.join(random.choice(chars) for _ in range(length))  
 
 def gather_proxy():
-        proxies = []
-        with open('config/proxies.txt', 'r', encoding='UTF-8') as file:
-            lines = file.readlines()
-            for line in lines:
-                proxies.append(line.replace('\n', ''))
-        return proxies
+    proxies = []
+    with open('config/proxies.txt', 'r', encoding='UTF-8') as file:
+        lines = file.readlines()
+        for line in lines:
+            proxies.append(line.replace('\n', ''))
+    return proxies
 
 def free_print(arg):
     lock.acquire()
@@ -46,8 +47,8 @@ def free_print(arg):
 
 class DiscordGen:
     def __init__(self, email, username, password, proxy=None):
-        options = webdriver.ChromeOptions()
-        options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        options = Options()
+        #options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         if proxy:
             prox = Proxy()
@@ -65,7 +66,7 @@ class DiscordGen:
                 'autodetect': False}
             options.add_argument('--proxy-server=%s' % proxy)
 
-        self.driver = webdriver.Chrome(options=options,desired_capabilities=capabilities)
+        self.driver = webdriver.Chrome(options=options, desired_capabilities=capabilities)
 
         self.email= email
         self.username = username
@@ -79,13 +80,13 @@ class DiscordGen:
         WebDriverWait(self.driver, 1).until(EC.presence_of_element_located((By.XPATH, "//input[@type='email']")))
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.email)                          
-        self.driver.find_element(By.XPATH, "//input[@type='email']").send_keys(self.email)
+        human_type(self.driver.find_element(By.XPATH, "//input[@type='email']"), self.email)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.username)
-        self.driver.find_element(By.XPATH, "//input[@type='text']").send_keys(self.username)
+        human_type(self.driver.find_element(By.XPATH, "//input[@type='text']"),self.username)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL} " +self.password)
-        self.driver.find_element(By.XPATH, "//input[@type='password']").send_keys(self.password)
+        human_type(self.driver.find_element(By.XPATH, "//input[@type='password']"),self.password)
 
         free_print(f"{Fore.LIGHTMAGENTA_EX}[*]{Style.RESET_ALL}" +' Random Date')
 
@@ -103,7 +104,6 @@ class DiscordGen:
             actions.send_keys(str(random.randint(1,12))) # Submitting the month
 
             actions.send_keys(Keys.ENTER)
-
 
             actions.send_keys(str(random.randint(1,28))) # Submitting the day
 
