@@ -294,7 +294,7 @@ def worker(proxy=None):
 def menu():
     proxies = gather_proxy()
 
-    os.system('clear')
+    os.system('cls')
 
     if len(proxies) != 0:
         os.system('title Discord Generator ^| coded by NightfallGT ^| PROXY LIST DETECTED')
@@ -311,7 +311,7 @@ def menu():
         user_input = 0
 
     if user_input == 1:
-        os.system('clear')
+        os.system('cls')
         UI.banner()
         UI.menu2()
 
@@ -349,7 +349,7 @@ def main():
         
         proxies = gather_proxy()
 
-        os.system('clear')
+        os.system('cls')
         UI.banner()
         print('\n\n')
 

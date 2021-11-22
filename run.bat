@@ -1,0 +1,2 @@
+python discordgenerator.py
+pause
